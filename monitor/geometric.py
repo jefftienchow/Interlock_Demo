@@ -46,4 +46,4 @@ def geometric_test(left_fit, right_fit, h):
     mean = statistics.mean(diffs)
     print('stdev', stdev)
     print('mean', mean)
-    return stdev < 2.0 and mean > 120.0 and mean < 150.0
+    return stdev < 5.0 and mean > 120.0 and mean < 140.0
