@@ -59,8 +59,8 @@ def get_certificate(img, low_res):
                     ym_per_pix=30 / 720, xm_per_pix=3.7 / 700)
     result = curves.fit(wb)
     visual = birds_eye.project(img, wb, result['pixel_left_best_fit_curve'], result['pixel_right_best_fit_curve'])
-    plt.imshow(visual)
-    plt.show()
+    # plt.imshow(visual)
+    # plt.show()
     left, right, source_pts, dest_pts = resize([result['pixel_left_best_fit_curve'], result['pixel_right_best_fit_curve']],
         SOURCE_PTS, DEST_PTS, SCALE_FACTOR)
 
