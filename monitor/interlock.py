@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from hashlib import sha512
 
 from birdseye import BirdsEye
 from helpers import roi
@@ -26,6 +27,23 @@ def run_tests(certificate):
     left_line = certificate['left']
     right_line = certificate['right']
     birds_eye = BirdsEye(certificate['source'], certificate['dest'])
+
+    time_stamp = certificate['timestamp']
+    signature = certificate['signature']
+    pub_key = certificate['pubkey']
+
+    # verify img from controller is correct
+    pre_verify = sha512(str(img).encode()+time_stamp.encode()).digest()
+    verify_hash = int.from_bytes(pre_verify, byteorder='big')
+    signature_hash = pow(signature, pub_key[0], pub_key[1])
+
+    if verify_hash != signature_hash:
+        print('Image was tampered with')
+        return
+    print('Image is legit')
+
+    # TODO: verify reasonable timestamp
+
     wb = get_binary(img, birds_eye, certificate['thresholds'])
     shape_result = geometric_test(left_line, right_line, img.shape[0])
     left_result = conformance_test(True, left_line, wb)

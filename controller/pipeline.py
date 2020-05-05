@@ -45,7 +45,7 @@ def resize(lines, source_pts, dest_pts, scale_factor):
     dest_pts = [(pt[0] * scale_factor, pt[1] * scale_factor) for pt in dest_pts]
     return lines[0], lines[1], source_pts, dest_pts
 
-def get_certificate(img, low_res):
+def get_certificate(img, low_res, time_stamp, signature, pub_key):
     """
     Finds the lane lines in the given image
     :param img: the image to find the lane lines on
@@ -65,7 +65,8 @@ def get_certificate(img, low_res):
         SOURCE_PTS, DEST_PTS, SCALE_FACTOR)
 
     return {'img': low_res, 'left': left, 'right': right,
-        'thresholds': REG_THRESHOLDS, 'source': source_pts, 'dest': dest_pts}
+        'thresholds': REG_THRESHOLDS, 'source': source_pts, 'dest': dest_pts,
+        'timestamp': time_stamp, 'signature': signature, 'pubkey': pub_key}
 
 if __name__ == "__main__":
     print(get_lines(cv2.imread('test_images/test1.jpg')))
