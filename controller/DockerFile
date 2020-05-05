@@ -1,7 +1,12 @@
 FROM python:3
 
-ADD pipeline.py
+WORKDIR /usr/src/app/controller
 
-RUN pip install -r requirements.txt
+COPY requirements.txt ./
 
-CMD ["python","pipeline.py"]
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python","./pipeline.py"]
