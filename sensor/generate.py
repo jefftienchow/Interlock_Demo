@@ -27,14 +27,14 @@ def get_images():
     cropped = crop(image, TOP_CROP, X_CROP)
     low_res = cv2.resize(cropped, (int(cropped.shape[1] * SCALE_FACTOR), int(cropped.shape[0] * SCALE_FACTOR)))
 
-    time_stamp, signature, pub_key = gen_signature(low_res)
+    time_stamp, signature = gen_signature(low_res)
 
     # print(time_stamp, signature)
 
-    return cropped, low_res, time_stamp, signature, pub_key
+    return cropped, low_res, time_stamp, signature
 
 def gen_signature(image):
-    fname = os.path.join(os.path.dirname(__file__), 'mykey.pem')
+    fname = os.path.join(os.path.dirname(__file__), 'privkey.pem')
 
     # check if key not stored yet
     if not os.path.exists(fname) or os.path.getsize(fname) == 0:
@@ -50,17 +50,22 @@ def gen_signature(image):
 
     hashed = int.from_bytes(pre_signature, byteorder='big')
     signature = pow(hashed, key.d, key.n)
-    pub_key = (key.e, key.n)
+    #pub_key = (key.e, key.n)
 
-    return time_stamp, signature, pub_key
+    return time_stamp, signature
 
 def gen_and_write_keys():
     key = RSA.generate(bits=1024)
 
-    fname = os.path.join(os.path.dirname(__file__), 'mykey.pem')
-    f = open(fname,'wb')
-    f.write(key.exportKey('PEM'))
-    f.close()
+    fname1 = os.path.join(os.path.dirname(__file__), 'privkey.pem')
+    f1 = open(fname1,'wb')
+    f1.write(key.exportKey('PEM'))
+    f1.close()
+
+    fname2 = os.path.join(os.path.dirname(__file__), 'pubkey.pem')
+    f2 = open(fname2,'wb')
+    f2.write(key.publickey().exportKey('PEM'))
+    f2.close()
 
 def main():
     print('sensor: ', socket.gethostbyname(socket.gethostname()))
@@ -80,6 +85,6 @@ def main():
             
 
 if __name__ == '__main__':
-    # gen_and_write_keys()
+    gen_and_write_keys()
     # gen_signature()
-    main()
+    # main()
