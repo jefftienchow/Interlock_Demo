@@ -71,8 +71,10 @@ class MonitorHandler(socketserver.StreamRequestHandler):
             print(result)
 
 def main():
+    print('interlock: ', socket.gethostbyname(socket.gethostname()))
     server = socketserver.TCPServer(('', PORT), MonitorHandler)
     server.serve_forever()
+    
 
 if __name__ == "__main__":
     main()

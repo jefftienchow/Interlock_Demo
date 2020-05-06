@@ -9,7 +9,7 @@ import time
 from Crypto.PublicKey import RSA
 from hashlib import sha512
 
-HOST = '127.0.0.1'  # The server's hostname or IP address
+HOST = '172.168.1.5'  # The server's hostname or IP address
 PORT = 65432        # The port used by the server
 
 TOP_CROP = 360
@@ -63,15 +63,21 @@ def gen_and_write_keys():
     f.close()
 
 def main():
+    print('sensor: ', socket.gethostbyname(socket.gethostname()))
     while True:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                # print('send something1')
+
                 s.connect((HOST, PORT))
+                # print('send something1')
                 package = get_images()
                 s.sendall(pickle.dumps(package))
+                # print('send something')
         except:
             print('waiting for controller to establish connection...')
         time.sleep(2)
+            
 
 if __name__ == '__main__':
     # gen_and_write_keys()

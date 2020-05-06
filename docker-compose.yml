@@ -1,0 +1,40 @@
+version: '2'
+services:
+  sensor:
+    image: sensor-image
+    networks: 
+      sensor-controller:
+        ipv4_address: 172.168.1.3
+    environment:
+      PYTHONUNBUFFERED: 1
+     
+  controller:
+    image: controller-image
+    networks: 
+      sensor-controller:
+        ipv4_address: 172.168.1.5
+      controller-monitor: 
+        ipv4_address: 172.168.1.135
+    environment:
+      PYTHONUNBUFFERED: 1
+
+  monitor: 
+    image: monitor-image
+    networks:
+      controller-monitor:
+        ipv4_address: 172.168.1.130
+    environment:
+      PYTHONUNBUFFERED: 1
+    
+networks:
+  sensor-controller: 
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.168.1.0/25
+
+  controller-monitor: 
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.168.1.128/25

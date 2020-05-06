@@ -13,7 +13,7 @@ import sys
 from scipy import signal
 import random
 
-HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+HOST = '172.168.1.130'  # Standard loopback interface address (localhost)
 SENSOR_PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 MONITOR_PORT = 54321
 
@@ -93,6 +93,7 @@ class ControllerHandler(socketserver.StreamRequestHandler):
                 print('waiting for controller to establish connection...')
 
 def main():
+    print('controller: ', socket.gethostbyname(socket.gethostname()))
     server = socketserver.TCPServer(('', SENSOR_PORT), ControllerHandler)
     server.serve_forever()
 

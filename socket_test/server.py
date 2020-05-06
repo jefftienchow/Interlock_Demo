@@ -15,6 +15,7 @@ class MyHandler(socketserver.StreamRequestHandler):
         if data:
             data_arr = pickle.loads(b"".join(data))
             print (data_arr)
+            # time.sleep(3)
 
 server = socketserver.TCPServer(('', PORT), MyHandler)
 server.serve_forever()
