@@ -85,6 +85,6 @@ def main():
             
 
 if __name__ == '__main__':
-    gen_and_write_keys()
+    # gen_and_write_keys()
     # gen_signature()
-    # main()
+    main()
