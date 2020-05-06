@@ -1,12 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from hashlib import sha512
+import pickle
+import socketserver
+import socket
 
 from birdseye import BirdsEye
 from helpers import roi
 from lanefilter import LaneFilter
 from conformance import conformance_test
 from geometric import geometric_test
+
+PORT = 54321
 
 def get_binary(img, birds_eye, thresholds):
     """
@@ -50,3 +55,24 @@ def run_tests(certificate):
     right_result = conformance_test(False, right_line, wb)
     result = birds_eye.project(img, wb, left_line, right_line)
     return shape_result, left_result, right_result
+
+
+class MonitorHandler(socketserver.StreamRequestHandler):
+    def handle(self):
+        data = []
+        while True:
+            packet = self.rfile.readline()
+            if not packet:
+                break
+            data.append(packet)
+        if data:
+            certificate = pickle.loads(b"".join(data))
+            result = run_tests(certificate)
+            print(result)
+
+def main():
+    server = socketserver.TCPServer(('', PORT), MonitorHandler)
+    server.serve_forever()
+
+if __name__ == "__main__":
+    main()

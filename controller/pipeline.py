@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 import pickle
+import socketserver
+import socket
 
 from birdseye import BirdsEye
 from lanefilter import LaneFilter
@@ -11,6 +13,9 @@ import sys
 from scipy import signal
 import random
 
+HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
+SENSOR_PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
+MONITOR_PORT = 54321
 
 # np.set_printoptions(threshold=sys.maxsize)
 SCALE_FACTOR = 1/5
@@ -58,6 +63,7 @@ def get_certificate(img, low_res, time_stamp, signature, pub_key):
     curves = Curves(number_of_windows=9, margin=100, minimum_pixels=10,
                     ym_per_pix=30 / 720, xm_per_pix=3.7 / 700)
     result = curves.fit(wb)
+    # print(result)
     visual = birds_eye.project(img, wb, result['pixel_left_best_fit_curve'], result['pixel_right_best_fit_curve'])
     # plt.imshow(visual)
     # plt.show()
@@ -68,5 +74,27 @@ def get_certificate(img, low_res, time_stamp, signature, pub_key):
         'thresholds': REG_THRESHOLDS, 'source': source_pts, 'dest': dest_pts,
         'timestamp': time_stamp, 'signature': signature, 'pubkey': pub_key}
 
+class ControllerHandler(socketserver.StreamRequestHandler):
+    def handle(self):
+        data = []
+        while True:
+            packet = self.rfile.readline()
+            if not packet:
+                break
+            data.append(packet)
+        if data:
+            data_arr = pickle.loads(b"".join(data))
+            certificate = get_certificate(*data_arr)
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((HOST, MONITOR_PORT))
+                    s.sendall(pickle.dumps(certificate))
+            except:
+                print('waiting for controller to establish connection...')
+
+def main():
+    server = socketserver.TCPServer(('', SENSOR_PORT), ControllerHandler)
+    server.serve_forever()
+
 if __name__ == "__main__":
-    print(get_lines(cv2.imread('test_images/test1.jpg')))
+    main()

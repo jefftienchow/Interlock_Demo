@@ -2,9 +2,15 @@ import random
 import cv2
 import os
 import datetime
+import socket
+import pickle
+import time
 
 from Crypto.PublicKey import RSA
 from hashlib import sha512
+
+HOST = '127.0.0.1'  # The server's hostname or IP address
+PORT = 65432        # The port used by the server
 
 TOP_CROP = 360
 X_CROP = 150
@@ -15,7 +21,7 @@ def crop(img, top_crop, x_crop):
     return img
 
 def get_images():
-    rand = random.SystemRandom().randrange(9)
+    rand = random.SystemRandom().randrange(8)
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     image = cv2.imread(os.path.join(__location__, 'test_images/test' + str(rand) + '.jpg'))
     cropped = crop(image, TOP_CROP, X_CROP)
@@ -23,7 +29,7 @@ def get_images():
 
     time_stamp, signature, pub_key = gen_signature(low_res)
 
-    print(time_stamp, signature)
+    # print(time_stamp, signature)
 
     return cropped, low_res, time_stamp, signature, pub_key
 
@@ -56,8 +62,18 @@ def gen_and_write_keys():
     f.write(key.exportKey('PEM'))
     f.close()
 
+def main():
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((HOST, PORT))
+                package = get_images()
+                s.sendall(pickle.dumps(package))
+        except:
+            print('waiting for controller to establish connection...')
+        time.sleep(2)
 
 if __name__ == '__main__':
     # gen_and_write_keys()
     # gen_signature()
-    get_images()
+    main()
