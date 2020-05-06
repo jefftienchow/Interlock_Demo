@@ -8,10 +8,9 @@ from sensor.generate import get_images
 from controller.pipeline import get_certificate
 from monitor.interlock import run_tests
 
-img, low_res, time_stamp, signature, pub_key = get_images()
+img, low_res, time_stamp, signature = get_images()
 
-
-certificate = get_certificate(img, low_res, time_stamp, signature, pub_key)
+certificate = get_certificate(img, low_res, time_stamp, signature)
 
 #### Man in the middle test ####
 # certificate['timestamp'] = '3'+certificate['timestamp'][1:]
