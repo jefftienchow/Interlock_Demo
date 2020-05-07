@@ -43,8 +43,6 @@ def get_images():
 
     time_stamp, signature = gen_signature(low_res)
 
-    # print(time_stamp, signature)
-
     return cropped, low_res, time_stamp, signature
 
 def gen_signature(image):
@@ -62,8 +60,8 @@ def gen_signature(image):
 
     key = RSA.importKey(sensor_key.privkey.decode())
 
-    # Example: of the form '02:18:33.438556'
-    time_stamp = str(datetime.datetime.now().time())
+    # Example: of the form '2020-05-06 22:47:09.850234 '
+    time_stamp = str(datetime.datetime.now())
 
     pre_signature = sha512(str(image).encode()+time_stamp.encode()).digest()
 

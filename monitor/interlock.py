@@ -2,6 +2,7 @@ import os
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from Crypto.PublicKey import RSA
 from hashlib import sha512
 import pickle
@@ -25,6 +26,10 @@ class MonitorKey():
         self.key = None
     
 monitor_key = MonitorKey()
+
+# keep track of image timestamps
+datetime_last = None
+max_delay = 4000 # maximum allowed time between images (in ms)
 
 if os.environ.get('PROD'):
     HOST = '172.168.0.130'
@@ -54,6 +59,9 @@ def get_binary(img, birds_eye, thresholds):
 #     return (key.e, key.n)
 
 def run_tests(certificate):
+    global datetime_last
+    global max_delay
+
     img = certificate['img']
     left_line = certificate['left']
     right_line = certificate['right']
@@ -74,7 +82,16 @@ def run_tests(certificate):
         return False
     print('Image is legit')
 
-    # TODO: verify reasonable timestamp
+    # verify reasonable timestamp, e.g. '2020-05-06 22:47:09.850234'
+    datetime_now = datetime.strptime(time_stamp, '%Y-%m-%d %H:%M:%S.%f')
+    
+    print('dt_last: ', datetime_last)
+    if datetime_last == None or (datetime_last < datetime_now < datetime_last + timedelta(milliseconds=max_delay)):
+        print('Timestamp is OK')
+        datetime_last = datetime_now
+    else:
+        print('Invalid Timestamp - Out of Range')
+        return False
 
     wb = get_binary(img, birds_eye, certificate['thresholds'])
     shape_result = geometric_test(left_line, right_line, img.shape[0])
@@ -90,6 +107,9 @@ def run_tests(certificate):
 
 def main():
     class MonitorHandler(socketserver.StreamRequestHandler):
+        # global datetime_last
+        # global max_delay
+
         def handle(self):
             data = []
             while True:
