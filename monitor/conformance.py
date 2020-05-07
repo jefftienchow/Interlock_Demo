@@ -43,8 +43,8 @@ def conformance_test(left, fit, img):
     else:
         actual_x = (result[1] + half_width - offset)
         expected_x = p(result[0] )
-    print(grad[result[0]][result[1]])
-    print(actual_x, "vs", expected_x)
+    # print(grad[result[0]][result[1]])
+    # print(actual_x, "vs", expected_x)
     # print('half is: ', half_width)
     # plt.imshow(curve_filter)
     # plt.show()

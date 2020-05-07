@@ -12,7 +12,7 @@ services:
       PROD: 1
      
   controller:
-    build: ./controller
+    build: ./controller_stops
     networks: 
       sensor-controller:
         ipv4_address: 172.168.1.5
