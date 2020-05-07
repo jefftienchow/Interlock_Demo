@@ -13,9 +13,11 @@ if os.environ.get('PROD'):
     CONTROLLER_HOST = '172.168.1.5'  # The server's hostname or IP address
     MONITOR_HOST = '172.168.0.5'
 else:
-    HOST = '127.0.1.1'
+    CONTROLLER_HOST = '127.0.1.1'
+    MONITOR_HOST = '127.0.1.1'
 
-PORT = 65432        # The port used by the server
+CONTROLLER_PORT = 65432        # The port used by the server
+MONITOR_PORT = 23456
 
 TOP_CROP = 360
 X_CROP = 150
@@ -77,9 +79,24 @@ def main():
     while True:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((MONITOR_HOST, MONITOR_PORT))
+                key = b"hi" # put real key here
+                s.sendall(key)
+                ack = s.recv(16)
+                print('ack is: ', ack)
+                if ack == b"ack":
+                    break
+        except:
+            print('waiting for monitor to establish connection...')
+        time.sleep(2)
+
+
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 # print('send something1')
 
-                s.connect((CONTROLLER_HOST, PORT))
+                s.connect((CONTROLLER_HOST, CONTROLLER_PORT))
                 # print('send something1')
                 package = get_images()
                 s.sendall(pickle.dumps(package))

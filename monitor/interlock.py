@@ -6,6 +6,7 @@ from hashlib import sha512
 import pickle
 import socketserver
 import socket
+import _thread as thread
 
 from birdseye import BirdsEye
 from helpers import roi
@@ -15,6 +16,14 @@ from geometric import geometric_test
 
 CONTROLLER_PORT = 54321
 ACTUATOR_PORT = 12345
+SENSOR_PORT = 23456
+
+
+class MonitorKey():
+    def __init__(self):
+        self.key = None
+    
+monitor_key = MonitorKey()
 
 if os.environ.get('PROD'):
     HOST = '172.168.0.130'
@@ -77,29 +86,44 @@ def run_tests(certificate):
     return False
 
 
-class MonitorHandler(socketserver.StreamRequestHandler):
-    def handle(self):
-        data = []
-        while True:
-            packet = self.rfile.readline()
-            if not packet:
-                break
-            data.append(packet)
-        if data:
-            certificate = pickle.loads(b"".join(data))
-            result = run_tests(certificate)
-            try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.connect((HOST, ACTUATOR_PORT))
-                    s.sendall(pickle.dumps(result))
-            except:
-                print('waiting for actuator to establish connection...')
-
-
 def main():
+    class MonitorHandler(socketserver.StreamRequestHandler):
+        def handle(self):
+            data = []
+            while True:
+                packet = self.rfile.readline()
+                if not packet:
+                    break
+                data.append(packet)
+            if data:
+                certificate = pickle.loads(b"".join(data))
+                result = run_tests(certificate)
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                        s.connect((HOST, ACTUATOR_PORT))
+                        s.sendall(pickle.dumps(result))
+                except:
+                    print('waiting for actuator to establish connection...')
+
+    class SensorHandler(socketserver.StreamRequestHandler):
+        def handle(self):
+            key = self.request.recv(1024)
+            # store the key here
+            monitor_key.key = key
+            print("sending ack")
+            self.request.send(b"ack")
+            def kill_server(server):
+                server.shutdown()
+            thread.start_new_thread(kill_server, (sensor_server,))
+
     print('interlock: ', socket.gethostbyname(socket.gethostname()))
-    server = socketserver.TCPServer(('', CONTROLLER_PORT), MonitorHandler)
-    server.serve_forever()
+    sensor_server = socketserver.TCPServer(('', SENSOR_PORT), SensorHandler)
+    sensor_server.serve_forever()
+    
+    print('monitor key is received; interlock is now functional')
+
+    controller_server = socketserver.TCPServer(('', CONTROLLER_PORT), MonitorHandler)
+    controller_server.serve_forever()
     
 
 if __name__ == "__main__":
