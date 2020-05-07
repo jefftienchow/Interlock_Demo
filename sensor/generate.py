@@ -112,14 +112,9 @@ def main():
     while True:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                print('send something0')
-
                 s.connect((CONTROLLER_HOST, CONTROLLER_PORT))
-                print('send something1')
                 package = get_images()
-                #print("package: ", package)
                 s.sendall(pickle.dumps(package))
-                print('send something2')
         except Exception as e:
             print(e)
             print('waiting for controller to establish connection...')

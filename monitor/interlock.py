@@ -9,6 +9,7 @@ import pickle
 import socketserver
 import socket
 import _thread as thread
+import threading
 
 from birdseye import BirdsEye
 from helpers import roi
@@ -83,12 +84,20 @@ def run_tests(certificate):
     print('Image is legit')
 
     # verify reasonable timestamp, e.g. '2020-05-06 22:47:09.850234'
-    datetime_now = datetime.strptime(time_stamp, '%Y-%m-%d %H:%M:%S.%f')
-    
-    print('dt_last: ', datetime_last)
-    if datetime_last == None or (datetime_last < datetime_now < datetime_last + timedelta(milliseconds=max_delay)):
+    timestamp_time = datetime.strptime(time_stamp, '%Y-%m-%d %H:%M:%S.%f')
+
+    # print('dt_last: ', datetime_last)
+    # if datetime_last == None or (datetime_last < datetime_now < datetime_last + timedelta(milliseconds=max_delay)):
+    #     print('Timestamp is OK')
+    #     datetime_last = datetime_now
+    # else:
+    #     print('Invalid Timestamp - Out of Range')
+    #     return False
+
+    cur_time = datetime.now()
+    if datetime_last is None or (datetime_last < timestamp_time and cur_time - timestamp_time < timedelta(milliseconds=max_delay)):
         print('Timestamp is OK')
-        datetime_last = datetime_now
+        datetime_last = timestamp_time
     else:
         print('Invalid Timestamp - Out of Range')
         return False
@@ -106,6 +115,7 @@ def run_tests(certificate):
 
 
 def main():
+    global datetime_last
     class MonitorHandler(socketserver.StreamRequestHandler):
         # global datetime_last
         # global max_delay
@@ -142,11 +152,20 @@ def main():
     print('interlock: ', socket.gethostbyname(socket.gethostname()))
     sensor_server = socketserver.TCPServer(('', SENSOR_PORT), SensorHandler)
     sensor_server.serve_forever()
-    
+
     print('monitor key is received; interlock is now functional')
 
     controller_server = socketserver.TCPServer(('', CONTROLLER_PORT), MonitorHandler)
-    controller_server.serve_forever()
+    th = threading.Thread(target=controller_server.serve_forever)
+    th.start()
+
+    while True:
+        if datetime_last is not None:
+            cur_time = datetime.now()
+            if cur_time - datetime_last > timedelta(milliseconds=max_delay):
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((HOST, ACTUATOR_PORT))
+                    s.sendall(pickle.dumps(False))
     
 
 if __name__ == "__main__":
