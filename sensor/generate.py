@@ -10,7 +10,8 @@ from Crypto.PublicKey import RSA
 from hashlib import sha512
 
 if os.environ.get('PROD'):
-    HOST = '172.168.1.5'  # The server's hostname or IP address
+    CONTROLLER_HOST = '172.168.1.5'  # The server's hostname or IP address
+    MONITOR_HOST = '172.168.0.5'
 else:
     HOST = '127.0.1.1'
 
@@ -78,7 +79,7 @@ def main():
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 # print('send something1')
 
-                s.connect((HOST, PORT))
+                s.connect((CONTROLLER_HOST, PORT))
                 # print('send something1')
                 package = get_images()
                 s.sendall(pickle.dumps(package))
