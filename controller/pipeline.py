@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 import socketserver
 import socket
+import os
 
 from birdseye import BirdsEye
 from lanefilter import LaneFilter
@@ -13,7 +14,12 @@ import sys
 from scipy import signal
 import random
 
-HOST = '172.168.1.130'  # Standard loopback interface address (localhost)
+if os.environ.get('PROD'):
+    HOST = '172.168.1.130' 
+else:
+    HOST = '127.0.1.1'
+
+
 SENSOR_PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 MONITOR_PORT = 54321
 
@@ -90,7 +96,7 @@ class ControllerHandler(socketserver.StreamRequestHandler):
                     s.connect((HOST, MONITOR_PORT))
                     s.sendall(pickle.dumps(certificate))
             except:
-                print('waiting for controller to establish connection...')
+                print('waiting for monitor to establish connection...')
 
 def main():
     print('controller: ', socket.gethostbyname(socket.gethostname()))

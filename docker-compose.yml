@@ -7,6 +7,7 @@ services:
         ipv4_address: 172.168.1.3
     environment:
       PYTHONUNBUFFERED: 1
+      PROD: 1
      
   controller:
     image: controller-image
@@ -17,6 +18,7 @@ services:
         ipv4_address: 172.168.1.135
     environment:
       PYTHONUNBUFFERED: 1
+      PROD: 1
 
   monitor: 
     image: monitor-image
@@ -25,6 +27,16 @@ services:
         ipv4_address: 172.168.1.130
     environment:
       PYTHONUNBUFFERED: 1
+      PROD: 1
+
+  actuator:
+    image: actuator-image
+    networks:
+      monitor-actuator:
+        ipv4_address: 172.168.0.130
+    environment:
+      PYTHONUNBUFFERED: 1
+      PROD: 1
     
 networks:
   sensor-controller: 
@@ -38,3 +50,9 @@ networks:
     ipam:
      config:
        - subnet: 172.168.1.128/25
+
+  monitor-actuator:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.168.0.128/25

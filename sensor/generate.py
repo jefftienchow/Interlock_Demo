@@ -9,7 +9,11 @@ import time
 from Crypto.PublicKey import RSA
 from hashlib import sha512
 
-HOST = '172.168.1.5'  # The server's hostname or IP address
+if os.environ.get('PROD'):
+    HOST = '172.168.1.5'  # The server's hostname or IP address
+else:
+    HOST = '127.0.1.1'
+
 PORT = 65432        # The port used by the server
 
 TOP_CROP = 360

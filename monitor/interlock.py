@@ -13,7 +13,13 @@ from lanefilter import LaneFilter
 from conformance import conformance_test
 from geometric import geometric_test
 
-PORT = 54321
+CONTROLLER_PORT = 54321
+ACTUATOR_PORT = 12345
+
+if os.environ.get('PROD'):
+    HOST = '172.168.0.130'
+else:
+    HOST = '127.0.1.1'
 
 def get_binary(img, birds_eye, thresholds):
     """
@@ -54,7 +60,7 @@ def run_tests(certificate):
 
     if verify_hash != signature_hash:
         print('Image was tampered with')
-        return
+        return False
     print('Image is legit')
 
     # TODO: verify reasonable timestamp
@@ -64,7 +70,11 @@ def run_tests(certificate):
     left_result = conformance_test(True, left_line, wb)
     right_result = conformance_test(False, right_line, wb)
     result = birds_eye.project(img, wb, left_line, right_line)
-    return shape_result, left_result, right_result
+    
+    if shape_result and left_result and right_result: 
+        return True
+    print('failed a test')
+    return False
 
 
 class MonitorHandler(socketserver.StreamRequestHandler):
@@ -78,11 +88,17 @@ class MonitorHandler(socketserver.StreamRequestHandler):
         if data:
             certificate = pickle.loads(b"".join(data))
             result = run_tests(certificate)
-            print(result)
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.connect((HOST, ACTUATOR_PORT))
+                    s.sendall(pickle.dumps(result))
+            except:
+                print('waiting for actuator to establish connection...')
+
 
 def main():
     print('interlock: ', socket.gethostbyname(socket.gethostname()))
-    server = socketserver.TCPServer(('', PORT), MonitorHandler)
+    server = socketserver.TCPServer(('', CONTROLLER_PORT), MonitorHandler)
     server.serve_forever()
     
 
