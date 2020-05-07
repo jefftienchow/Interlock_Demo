@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from Crypto.PublicKey import RSA
@@ -44,13 +45,13 @@ def get_binary(img, birds_eye, thresholds):
     width = birds_eye_view.shape[1]
     return roi(birds_eye_view, width//10, width - width//10).astype(np.uint8)
 
-def get_public_key():
-    fname = os.path.join(os.path.dirname(__file__), 'pubkey.pem')
+# def get_public_key():
+#     fname = os.path.join(os.path.dirname(__file__), 'pubkey.pem')
 
-    f = open(fname,'r')
-    key = RSA.importKey(f.read())
+#     f = open(fname,'r')
+#     key = RSA.importKey(f.read())
 
-    return (key.e, key.n)
+#     return (key.e, key.n)
 
 def run_tests(certificate):
     img = certificate['img']
@@ -60,7 +61,8 @@ def run_tests(certificate):
 
     time_stamp = certificate['timestamp']
     signature = certificate['signature']
-    pub_key = get_public_key()
+    imported_key = RSA.importKey(monitor_key.key)
+    pub_key = (imported_key.e, imported_key.n)
 
     # verify img from controller is correct
     pre_verify = sha512(str(img).encode()+time_stamp.encode()).digest()
@@ -111,6 +113,7 @@ def main():
             # store the key here
             monitor_key.key = key
             print("sending ack")
+            print("monitor key is: ", key)
             self.request.send(b"ack")
             def kill_server(server):
                 server.shutdown()

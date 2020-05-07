@@ -19,6 +19,13 @@ else:
 CONTROLLER_PORT = 65432        # The port used by the server
 MONITOR_PORT = 23456
 
+class SensorKey():
+    def __init__(self):
+        self.privkey = None
+        self.pubkey = None
+
+sensor_key = SensorKey()
+
 TOP_CROP = 360
 X_CROP = 150
 SCALE_FACTOR = 1/5
@@ -41,14 +48,19 @@ def get_images():
     return cropped, low_res, time_stamp, signature
 
 def gen_signature(image):
-    fname = os.path.join(os.path.dirname(__file__), 'privkey.pem')
+    # fname = os.path.join(os.path.dirname(__file__), 'privkey.pem')
 
-    # check if key not stored yet
-    if not os.path.exists(fname) or os.path.getsize(fname) == 0:
-        gen_and_write_keys()
+    # # check if key not stored yet
+    # if not os.path.exists(fname) or os.path.getsize(fname) == 0:
+    #     gen_and_write_keys()
 
-    f = open(fname,'r')
-    key = RSA.importKey(f.read())
+    # f = open(fname,'r')
+    # key = RSA.importKey(f.read())
+
+    # if sensor_key.privkey == None:
+    #     gen_and_write_keys()
+
+    key = RSA.importKey(sensor_key.privkey.decode())
 
     # Example: of the form '02:18:33.438556'
     time_stamp = str(datetime.datetime.now().time())
@@ -64,23 +76,31 @@ def gen_signature(image):
 def gen_and_write_keys():
     key = RSA.generate(bits=1024)
 
-    fname1 = os.path.join(os.path.dirname(__file__), 'privkey.pem')
-    f1 = open(fname1,'wb')
-    f1.write(key.exportKey('PEM'))
-    f1.close()
+    # fname1 = os.path.join(os.path.dirname(__file__), 'privkey.pem')
+    # f1 = open(fname1,'wb')
+    # f1.write(key.exportKey('PEM'))
+    # f1.close()
 
-    fname2 = os.path.join(os.path.dirname(__file__), 'pubkey.pem')
-    f2 = open(fname2,'wb')
-    f2.write(key.publickey().exportKey('PEM'))
-    f2.close()
+    sensor_key.privkey = key.exportKey('PEM')
+
+    # fname2 = os.path.join(os.path.dirname(__file__), 'pubkey.pem')
+    # f2 = open(fname2,'wb')
+    # f2.write(key.publickey().exportKey('PEM'))
+    # f2.close()
+
+    sensor_key.pubkey = key.publickey().exportKey('PEM')
 
 def main():
     print('sensor: ', socket.gethostbyname(socket.gethostname()))
+
+    gen_and_write_keys()
+
     while True:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((MONITOR_HOST, MONITOR_PORT))
-                key = b"hi" # put real key here
+                key = sensor_key.pubkey # put real key here
+                print("key is ", key)
                 s.sendall(key)
                 ack = s.recv(16)
                 print('ack is: ', ack)
@@ -94,14 +114,16 @@ def main():
     while True:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                # print('send something1')
+                print('send something0')
 
                 s.connect((CONTROLLER_HOST, CONTROLLER_PORT))
-                # print('send something1')
+                print('send something1')
                 package = get_images()
+                #print("package: ", package)
                 s.sendall(pickle.dumps(package))
-                # print('send something')
-        except:
+                print('send something2')
+        except Exception as e:
+            print(e)
             print('waiting for controller to establish connection...')
         time.sleep(2)
             

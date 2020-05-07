@@ -16,6 +16,8 @@ class ActuatorHandler(socketserver.StreamRequestHandler):
             result = pickle.loads(b"".join(data))
             if not (result):
                 print("Stop! Intervention from monitor!")
+            else:
+                print("Everything's OK")
 
 def main():
     print('actuator: ', socket.gethostbyname(socket.gethostname()))
