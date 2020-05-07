@@ -86,14 +86,6 @@ def run_tests(certificate):
     # verify reasonable timestamp, e.g. '2020-05-06 22:47:09.850234'
     timestamp_time = datetime.strptime(time_stamp, '%Y-%m-%d %H:%M:%S.%f')
 
-    # print('dt_last: ', datetime_last)
-    # if datetime_last == None or (datetime_last < datetime_now < datetime_last + timedelta(milliseconds=max_delay)):
-    #     print('Timestamp is OK')
-    #     datetime_last = datetime_now
-    # else:
-    #     print('Invalid Timestamp - Out of Range')
-    #     return False
-
     cur_time = datetime.now()
     if datetime_last is None or (datetime_last < timestamp_time and cur_time - timestamp_time < timedelta(milliseconds=max_delay)):
         print('Timestamp is OK')

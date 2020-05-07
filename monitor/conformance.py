@@ -53,6 +53,4 @@ def conformance_test(left, fit, img):
     # plt.imshow(grad)
     # plt.show()
 
-    if abs(actual_x - expected_x) < 10 and grad[result[0]][result[1]] > 1000:
-        return True
-    return False
+    return abs(actual_x - expected_x) < 10 and grad[result[0]][result[1]] > 1000

@@ -28,14 +28,14 @@ sensor_key = SensorKey()
 
 TOP_CROP = 360
 X_CROP = 150
-SCALE_FACTOR = 1/5
+SCALE_FACTOR = 1/10
 
 def crop(img, top_crop, x_crop):
     img = img[top_crop:, x_crop:img.shape[1] - x_crop]
     return img
 
 def get_images():
-    rand = random.SystemRandom().randrange(8)
+    rand = random.SystemRandom().randrange(7)
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     image = cv2.imread(os.path.join(__location__, 'test_images/test' + str(rand) + '.jpg'))
     cropped = crop(image, TOP_CROP, X_CROP)

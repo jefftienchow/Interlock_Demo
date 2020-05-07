@@ -14,5 +14,7 @@ certificate = get_certificate(img, low_res, time_stamp, signature)
 
 #### Man in the middle test ####
 # certificate['timestamp'] = '3'+certificate['timestamp'][1:]
-
+from datetime import datetime
+start = datetime.now()
 print(run_tests(certificate))
+print(datetime.now() - start)

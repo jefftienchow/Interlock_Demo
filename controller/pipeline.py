@@ -24,7 +24,7 @@ SENSOR_PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 MONITOR_PORT = 54321
 
 # np.set_printoptions(threshold=sys.maxsize)
-SCALE_FACTOR = 1/5
+SCALE_FACTOR = 1/10
 X_CROP = 150
 SOURCE_PTS = [(430, 100), (55, 360), (960, 360), (553, 100)]
 DEST_PTS = [(170, -360), (170, 360), (810, 360), (810, -360)]
