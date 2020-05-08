@@ -160,6 +160,7 @@ def main():
                     print('Too long since last image arrived')
                     s.connect((HOST, ACTUATOR_PORT))
                     s.sendall(pickle.dumps(False))
+        time.sleep(.4)
     
 
 if __name__ == "__main__":
