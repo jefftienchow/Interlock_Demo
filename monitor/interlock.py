@@ -30,7 +30,8 @@ monitor_key = MonitorKey()
 
 # keep track of image timestamps
 datetime_last = None
-max_delay = 4000 # maximum allowed time between images (in ms)
+max_delay = 800 # maximum allowed time between images (in ms)
+start_time = None
 
 if os.environ.get('PROD'):
     HOST = '172.168.0.130'
@@ -150,12 +151,13 @@ def main():
     controller_server = socketserver.TCPServer(('', CONTROLLER_PORT), MonitorHandler)
     th = threading.Thread(target=controller_server.serve_forever)
     th.start()
-
+    time.sleep(2)
     while True:
         if datetime_last is not None:
             cur_time = datetime.now()
             if cur_time - datetime_last > timedelta(milliseconds=max_delay):
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    print('Too long since last image arrived')
                     s.connect((HOST, ACTUATOR_PORT))
                     s.sendall(pickle.dumps(False))
     

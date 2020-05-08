@@ -108,6 +108,7 @@ def main():
             print('waiting for monitor to establish connection...')
         time.sleep(2)
 
+    time.sleep(1)
 
     while True:
         try:
@@ -118,7 +119,7 @@ def main():
         except Exception as e:
             print(e)
             print('waiting for controller to establish connection...')
-        time.sleep(2)
+        time.sleep(.4)
             
 
 if __name__ == '__main__':
