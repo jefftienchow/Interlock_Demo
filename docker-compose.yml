@@ -10,6 +10,9 @@ services:
     environment:
       PYTHONUNBUFFERED: 1
       PROD: 1
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
      
   controller:
     build: ./controller
@@ -34,6 +37,9 @@ services:
     environment:
       PYTHONUNBUFFERED: 1
       PROD: 1
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
 
   actuator:
     build: ./actuator
