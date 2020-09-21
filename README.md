@@ -1,5 +1,5 @@
 # Interlock Demo
-The goal of this project is to demonstrate a run-time monitor for verifying visual lane perception. There are four components: the sensor, controller, monitor, and actuator. The monitor detects flaws in the controller's perception and intervense when these flaws are detected. Docker is used to enforce isolation between components. 
+The goal of this project is to demonstrate a run-time monitor for verifying visual lane perception. There are four components: the sensor, controller, monitor, and actuator. The monitor detects flaws in the controller's perception and intervense when these flaws are detected. Docker is used to enforce isolation between components. This project was developed as a final project for 6.858. 
 
 ## Requirements
 Must be using a working distribution of Linux and have docker and docker-compose installed.
